@@ -6,6 +6,7 @@ import unicodedata
 import os
 from datetime import datetime
 import random
+import subprocess
 
 
     
@@ -451,16 +452,20 @@ class tuongtaccheo:
                 time.sleep(sleep_time)
 
 
-
-
 class messageSource:
+    def get_ipv4_from_ipconfig():
+        output = subprocess.check_output("ipconfig", shell=True, text=True, encoding="utf-8", errors="ignore")
+        match = re.search(r"IPv4 Address[^\d]*([\d]+\.[\d]+\.[\d]+\.[\d]+)", output)
+        serverlocal = match.group(1) if match else None
+        return serverlocal
+
     def openApp(bundleID: str):
         return f'at.appRun("{bundleID}")'
 
     def openURL(url: str):
         return f'at.openURL("{url}")'
 
-    def comment(link: str, text: str):
+    def comment(serverlocal: str, link: str, text: str):
         message = f"""
     function tapAddCommentWait5s(image_path, rx, ry, rz, rt)
         local startTime = os.time()
@@ -507,7 +512,7 @@ class messageSource:
                     usleep(5000000)
                     
                     local url = string.format(
-                    "http://192.168.1.2:5000/api?action=updateStatus&localip=%s&message=Jobdone",
+                    "http://{serverlocal}/api?action=updateStatus&localip=%s&message=Jobdone",
                     tostring(localip)
                     )
                     curl.easy{{
@@ -522,7 +527,7 @@ class messageSource:
 
                 else
                     local url = string.format(
-                    "http://192.168.1.2:5000/api?action=updateStatus&localip=%s&message=Jobfail",
+                    "http://{serverlocal}/api?action=updateStatus&localip=%s&message=Jobfail",
                     tostring(localip)
                     )
                     curl.easy{{
@@ -537,7 +542,7 @@ class messageSource:
                 end
             else
                 local url = string.format(
-                "http://192.168.1.2:5000/api?action=updateStatus&localip=%s&message=Jobfail",
+                "http://{serverlocal}/api?action=updateStatus&localip=%s&message=Jobfail",
                 tostring(localip)
                 )
                 curl.easy{{
@@ -552,7 +557,7 @@ class messageSource:
             end
         else
             local url = string.format(
-            "http://192.168.1.2:5000/api?action=updateStatus&localip=%s&message=Jobfail",
+            "http://{serverlocal}/api?action=updateStatus&localip=%s&message=Jobfail",
             tostring(localip)
             )
             curl.easy{{
@@ -567,7 +572,7 @@ class messageSource:
         end
     else
         local url = string.format(
-        "http://192.168.1.2:5000/api?action=updateStatus&localip=%s&message=Jobfail",
+        "http://{serverlocal}/api?action=updateStatus&localip=%s&message=Jobfail",
         tostring(localip)
         )
         curl.easy{{
@@ -583,7 +588,7 @@ class messageSource:
         """
         return message
 
-    def follow(link: str):
+    def follow(serverlocal: str, link: str):
         message = f"""
     function tapAddCommentWait5s(image_path, rx, ry, rz, rt)
         local startTime = os.time()
@@ -619,7 +624,7 @@ class messageSource:
         local curl = require('lcurl')
         local localip = getLocalIP()
         local url = string.format(
-        "http://192.168.1.2:5000/api?action=updateStatus&localip=%s&message=Jobdone",
+        "http://{serverlocal}/api?action=updateStatus&localip=%s&message=Jobdone",
         tostring(localip)
         )
         curl.easy{{
@@ -636,7 +641,7 @@ class messageSource:
         local curl = require('lcurl')
         local localip = getLocalIP()
         local url = string.format(
-        "http://192.168.1.2:5000/api?action=updateStatus&localip=%s&message=Jobfail",
+        "http://{serverlocal}/api?action=updateStatus&localip=%s&message=Jobfail",
         tostring(localip)
         )
         curl.easy{{
@@ -653,7 +658,7 @@ class messageSource:
     """
         return message
 
-    def luot_tiktok_truoc_khi_chay():
+    def luot_tiktok_truoc_khi_chay(serverlocal: str):
         message = f"""
         function swipeVertically()
             local times = math.random(3, 6)
@@ -690,14 +695,15 @@ class messageSource:
 
         local localip = getLocalIP()
         local url = string.format(
-        "http://192.168.1.2:5000/api?action=updateStatus&localip=%s&message=Jobdone",
+        "http://{serverlocal}/api?action=updateStatus&localip=%s&message=Jobdone",
         tostring(localip)
         )
         openURL(url)
 
         """
         return message
-    
+
+
 class serverJob:
     def createJob(localip: str):
         api = f"http://127.0.0.1:5000/api?action=createJob&localip={localip}&message=hello"
@@ -787,7 +793,6 @@ class serverJob:
         api = f"http://127.0.0.1:5000/api?action=deleteJob&localip={localip}"
         r = requests.get(api, timeout=10)
         return r.status_code
-
 
 
 class WaitGetXuManager:
@@ -1004,6 +1009,7 @@ def get_acc_safeum():
         print(f"Đã xảy ra lỗi khi xử lý file: {e}")
         return None
 
+
 class autoTouch:
     def post_lua_payload(ip_port, message, name_file: str):
         url = f"http://{ip_port}/file/update?path=/{name_file}"
@@ -1026,7 +1032,6 @@ class autoTouch:
         return r.text
 
 # tds = traodoisub(access_token="TDS0nIzIXZ2V2ciojIyVmdlNnIsISMhZjMxAzMxMHZ0lHc2VGZiojIyV2c1Jye", proxy="163.47.31.110:40338:Proxy_l4vj8oqt:8VPQU8ZQFK")
-
 
 
 # data = get_acc_safeum()

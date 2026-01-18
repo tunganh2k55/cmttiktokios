@@ -45,6 +45,7 @@ if not accounts:
 def run_jobs_for_device(account_data):
     """Chạy các job cho một thiết bị"""
     try:
+        serverlocal = messageSource.get_ipv4_from_ipconfig()
         luot_tiktok_truoc_khi_chay = False
 
         localip, access_token, proxy, userTikTok = account_data.split("|")
@@ -132,7 +133,7 @@ def run_jobs_for_device(account_data):
                     continue
                 
                 ui.update_status(localip, "Gửi job đến auto touch...")
-                autoTouch.post_lua_payload(localip, message=messageSource.comment(job["link"], job["nd_first"]), name_file="test.lua")
+                autoTouch.post_lua_payload(localip, message=messageSource.comment(serverlocal, job["link"], job["nd_first"]), name_file="test.lua")
                 time.sleep(2)
                 
                 ui.update_status(localip, "Chạy job trên iOS...")

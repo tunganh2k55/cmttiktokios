@@ -4,6 +4,7 @@ import threading
 from concurrent.futures import ThreadPoolExecutor
 import time
 
+
 # Khởi tạo UI
 ui = TikTokTDSUI()
 

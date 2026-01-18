@@ -56,6 +56,8 @@ def run_jobs_for_device(account_data):
         ttc = tuongtaccheo(access_token=access_token, proxy=proxy)
         ttc.login()
 
+        ttc.add_tiktok(userTikTok)
+
 
         
 
@@ -114,6 +116,12 @@ def run_jobs_for_device(account_data):
                 print(f"[{localip}] idjob: {job.get('idpost')}")
                 print(f"[{localip}] Link: {job.get('link')}")
                 print(f"[{localip}] Nội dung: {job.get('nd_first')}")
+
+                if job.get('nd_first') == "None":
+                    ui.update_status(localip, f"Nội dung trống bỏ qua")
+                    print("Nội dung trống bỏ qua")
+                    print("==================================")
+                    continue
                 
                 ui.update_status(localip, "Tạo job trên server...")
                 serverJob.deleteJob(localip=ip)
@@ -147,10 +155,11 @@ def run_jobs_for_device(account_data):
                 ui.update_status(localip, f"Job {job['idpost']} đã done, lưu vào file chờ nhận xu...")
                 print("======================================")
                 WaitGetXuManager.add_job(job["idpost"], ip)
-                time.sleep(15)
+                ui.update_status(localip, f"Chờ 15 giây để làm job khác")
+                time.sleep(10)
                 
                 ui.update_status(localip, "Kiểm tra các job đã đủ thời gian chờ...")
-                countJob, failJob, xu_them_received = WaitGetXuManager.process_ready_jobs(ttc, ip, failJob, maxFailJob, countJob, maxJobDone, min_wait_seconds=180)
+                countJob, failJob, xu_them_received = WaitGetXuManager.process_ready_jobs(ttc, ip, failJob, maxFailJob, countJob, maxJobDone, min_wait_seconds=60)
                 
                 # Cập nhật số xu thêm và số job đã hoàn thành
                 if xu_them_received > 0:

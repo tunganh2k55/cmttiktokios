@@ -5,7 +5,7 @@ import time
 import unicodedata
 import os
 from datetime import datetime
-
+import random
 
 
     
@@ -61,7 +61,6 @@ class traodoisub:
             return int(result.json()['data']['xu'])
 
     def set_account(self, userTikTok: str):
-        self.test_proxy()
         url = f"https://traodoisub.com/api/?fields=tiktok_run&id={userTikTok}&access_token={self.access_token}"
         response = self.session.get(url, timeout=15)
         data = response.json()
@@ -130,7 +129,6 @@ class traodoisub:
         return []
 
     def sendCache(self, idJob):
-        self.test_proxy()
         url = "https://traodoisub.com/api/coin/"
         params = {
         "type":"TIKTOK_FOLLOW_CACHE",
@@ -143,7 +141,6 @@ class traodoisub:
         return data
 
     def getXuFollow(self):
-        self.test_proxy()
         url = "https://traodoisub.com/api/coin/"
         
         params = {
@@ -197,9 +194,6 @@ class traodoisub:
         print("Hết số lần retry getXuFollow")
         return False
 
-    def test_proxy(self):
-        r = self.session.get("https://api.ipify.org?format=json", timeout=15)
-        print("Outbound IP:", r.text)
 
 class tuongtaccheo:
     def __init__(self, access_token: str, proxy:str | None = None):
@@ -401,9 +395,10 @@ class tuongtaccheo:
 
         return {"total": len(jobs), "jobs": jobs}
 
+
     def nhan_tien_cmtcheo(self, comment_id: str):
         self._require_login()
-        
+
         url = "https://tuongtaccheo.com/tiktok/kiemtien/cmtcheo/nhantien.php"
 
         headers = {
@@ -414,21 +409,47 @@ class tuongtaccheo:
             "X-Requested-With": "XMLHttpRequest"
         }
 
-        data = {
-            "id": comment_id
-        }
+        data = {"id": comment_id}
 
-        response = self.session.post(
-            url,
-            headers=headers,
-            data=data,
-            timeout=15
-        )
+        max_retry = 5
+        timeout_sec = 15
 
-        return {
-            "status_code": response.status_code,
-            "text": response.text
-        }
+        for attempt in range(1, max_retry + 1):
+            try:
+                response = self.session.post(
+                    url,
+                    headers=headers,
+                    data=data,
+                    timeout=timeout_sec
+                )
+
+                # retry nếu server lỗi / bị limit
+                if response.status_code in (429, 500, 502, 503, 504):
+                    if attempt < max_retry:
+                        sleep_time = (2 ** attempt) + random.uniform(0.3, 1.2)
+                        time.sleep(sleep_time)
+                        continue
+
+                return {
+                    "status_code": response.status_code,
+                    "text": response.text
+                }
+
+            except (requests.exceptions.ReadTimeout,
+                    requests.exceptions.ConnectTimeout,
+                    requests.exceptions.ProxyError,
+                    requests.exceptions.SSLError,
+                    requests.exceptions.ConnectionError) as e:
+
+                if attempt == max_retry:
+                    return {
+                        "status_code": -1,
+                        "text": f"Request failed after {max_retry} retries: {e}"
+                    }
+
+                sleep_time = (2 ** attempt) + random.uniform(0.3, 1.2)
+                time.sleep(sleep_time)
+
 
 
 

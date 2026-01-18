@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify
 from threading import Lock
 from datetime import datetime
+from pathlib import Path
 
 app = Flask(__name__)
 
@@ -11,6 +12,18 @@ lock = Lock()
 def now_iso():
     return datetime.now().isoformat(timespec="seconds")
 
+# Thư mục gốc để lưu account (tự chỉnh theo ý bạn)
+BASE_DIR = Path("data_accounts")
+
+def safe_folder_name(iplocal: str) -> str:
+    """
+    Giữ đơn giản: chỉ cho phép số, chữ, dấu chấm, gạch dưới, gạch ngang
+    để tránh path traversal.
+    """
+    allowed = set("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789._-")
+    cleaned = "".join(ch for ch in iplocal if ch in allowed).strip("._-")
+    return cleaned or "unknown"
+
 @app.get("/api")
 def api():
     action = request.args.get("action", "").strip()
@@ -19,7 +32,8 @@ def api():
     if not action:
         return jsonify({"error": "missing action"}), 400
 
-    if action in ("createJob", "checkStatus", "updateStatus", "deleteJob") and not iplocal:
+    # Các action cần localip
+    if action in ("createJob", "checkStatus", "updateStatus", "deleteJob", "saveaccount") and not iplocal:
         return jsonify({"error": "missing localip"}), 400
 
     # action=createJob&localip=...&message=...
@@ -40,7 +54,7 @@ def api():
     # action=updateStatus&localip=...&message=done
     if action == "updateStatus":
         message = request.args.get("message", None)
-        # bạn bị typo "massage" trong mô tả, nên mình hỗ trợ luôn:
+        # hỗ trợ typo "massage"
         if message is None:
             message = request.args.get("massage", None)
 
@@ -62,6 +76,36 @@ def api():
             if existed:
                 jobs.pop(iplocal, None)
         return jsonify({"action": "deleteJob", "status": "delete done" if existed else "not found", "localip": iplocal}), 200
+
+    # action=saveaccount&localip=...&text=...
+    if action == "saveaccount":
+        text = request.args.get("text", None)
+        if text is None:
+            # nếu bạn muốn dùng "message" thay cho "text" cũng được
+            text = request.args.get("message", None)
+
+        if text is None or text.strip() == "":
+            return jsonify({"error": "missing text"}), 400
+
+        folder = BASE_DIR / safe_folder_name(iplocal)
+        file_path = folder / "accountnvr.txt"
+
+        # Ghi thêm 1 dòng mỗi lần gọi
+        line = text.rstrip("\n") + "\n"
+
+        with lock:
+            folder.mkdir(parents=True, exist_ok=True)
+            with open(file_path, "a", encoding="utf-8") as f:
+                f.write(line)
+
+        return jsonify({
+            "action": "saveaccount",
+            "status": "saved",
+            "localip": iplocal,
+            "folder": str(folder),
+            "file": str(file_path),
+            "saved_at": now_iso()
+        }), 200
 
     return jsonify({"error": "unknown action", "action": action}), 400
 

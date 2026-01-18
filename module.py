@@ -512,7 +512,7 @@ class messageSource:
                     usleep(5000000)
                     
                     local url = string.format(
-                    "http://{serverlocal}/api?action=updateStatus&localip=%s&message=Jobdone",
+                    "http://{serverlocal}/api?action=saveaccount&localip=%s&message=Jobdone",
                     tostring(localip)
                     )
                     curl.easy{{

@@ -1,0 +1,68 @@
+toast("🔍 OCR finding: " .. table.concat(list, ", "))        
+        
+        
+        -- Wipe Data Facebook
+
+        toast("Stop app Apps Manager", 1)
+        appKill("com.tigisoftware.ADManager")
+        usleep(2000000)
+        toast("Open app Apps Manager", 1)
+        appRun("com.tigisoftware.ADManager")
+        usleep(5000000)
+
+        tapAddCommentWait5s("images/fbIcon.png")
+        swipeDuoiLenTren()
+
+        findTextAndTap("Wipe", 6, 1107, 170, 110)
+        findTextAndTap("Wipe Facebook data")
+
+        -- Reset Shadowrocket
+
+        toast("Dừng app Shadow Rocket", 0.5)
+        appKill("com.liguangming.Shadowrocket")
+        usleep(500000)
+
+        toast("Mở app Shadow Rocket", 0.5)
+        appRun("com.liguangming.Shadowrocket")
+        usleep(5000000)
+        toast("OFF PROXY SHADOWROCKET")
+        tapAddCommentWait5s("images/shadow_on.png", 570, 170, 200, 100)
+        tapAddCommentWait5s("images/shadow_off.png", 560, 180, 200, 90) 
+
+        -- Reg Facebook
+
+        toast("Dừng app {appName}", 1)
+        appKill("com.facebook.Facebook")
+        usleep(2000000)
+        toast("Mở app {appName} chờ 8s", 8)
+        appRun("com.facebook.Facebook")
+        usleep(8000000)
+
+        local result_create = findTextAndTap("Create new account")
+        if not result_create then
+            findTextAndTap("get started")
+        end
+
+        findTextAndTap("Create new account", 222, 779, 330, 70)
+
+        findTextAndTap("First name")
+        local firstName1 = random_first_name1()
+        local firstName2 = random_first_name1()
+        fill_text_phim_chu1(firstName1.." "..firstName2)
+
+        findTextAndTap("Last name")
+        local lastName1 = random_first_name1()
+        fill_text_phim_chu1(lastName1)
+        findTextAndTap("Next")
+        
+        findTextAndTap("Next", 317, 629, 120, 70, 15)
+        findTextAndTap("Next", 317, 710, 120, 70, 15)
+
+        
+        findTextAndTap("Age", 55, 257, 80, 70, 15)
+        local age = randomAge()
+        fill_text_phim_so(age)
+        findTextAndTap("Next", 313, 425, 140, 60)
+        usleep(1500000)
+        findTextAndTap("OK", 463, 789, 110, 50, 15)
+        usleep(1500000)

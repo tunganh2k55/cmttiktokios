@@ -467,28 +467,28 @@ class messageSource:
 
     def comment(serverlocal: str, link: str, text: str):
         message = f"""
-    function tapAddCommentWait5s(image_path, rx, ry, rz, rt)
-        local startTime = os.time()
-        local timeout = 5
-        local region = {{rx, ry, rz, rt}}
+                                        function tapAddCommentWait5s(image_path, rx, ry, rz, rt)
+                                            local startTime = os.time()
+                                            local timeout = 5
+                                            local region = {{rx, ry, rz, rt}}
 
-        while (os.time() - startTime) < timeout do
-            local result = findImage(image_path, 1, 0.95, region, true, 1)
+                                            while (os.time() - startTime) < timeout do
+                                                local result = findImage(image_path, 1, 0.95, region, true, 1)
 
-            if result ~= nil and #result > 0 then
-                local x = result[1][1]
-                local y = result[1][2]
+                                                if result ~= nil and #result > 0 then
+                                                    local x = result[1][1]
+                                                    local y = result[1][2]
 
-                tap(x, y)
-                usleep(1500000)
-                return true, x, y
-            end
+                                                    tap(x, y)
+                                                    usleep(1500000)
+                                                    return true, x, y
+                                                end
 
-            usleep(200000)
-        end
+                                                usleep(200000)
+                                            end
 
-        return false, nil, nil
-    end
+                                            return false, nil, nil
+                                        end
 
     local curl = require('lcurl')
     local localip = getLocalIP()
